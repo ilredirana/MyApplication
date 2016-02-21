@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-public class AlarmReceiver extends BroadcastReceiver {
-    public AlarmReceiver() {
+public class StartServiceReceiver extends BroadcastReceiver {
+    public StartServiceReceiver() {
     }
 
     @Override

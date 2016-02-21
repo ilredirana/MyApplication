@@ -7,9 +7,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +23,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //服务器ip地址
     String serverIP;
     EditText edit_ip;
+    boolean isServiceRunning;
+    FloatingActionButton fab;
+    Button changeIp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,36 +33,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
+        changeIp = (Button) findViewById(R.id.change_ip);
+        changeIp.setOnClickListener(this);
         edit_ip = (EditText) findViewById(R.id.edit_ip);
         preferences = getSharedPreferences("config",MODE_PRIVATE);
         serverIP = preferences.getString("server_ip",null);
         if (!(null==serverIP)){
             edit_ip.setText(serverIP);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -69,13 +54,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     edit_ip.requestFocus();
                     return;
                 }
-                Intent intent = new Intent(this,BackgroundService.class);
-                startService(intent);
-                Snackbar.make(v, "后台服务已启动", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if (isServiceRunning){
+                    Intent intent = new Intent(this,BackgroundService.class);
+                    stopService(intent);
+                    Snackbar.make(v, "后台服务已停止", Snackbar.LENGTH_LONG).show();
+                    isServiceRunning = false;
+                    fab.setImageResource(R.drawable.ic_play_light);
+                }else {
+                    Intent intent = new Intent(this,BackgroundService.class);
+                    startService(intent);
+                    Snackbar.make(v, "后台服务已启动", Snackbar.LENGTH_LONG).show();
+                    fab.setImageResource(R.drawable.ic_pause_light);
+                    isServiceRunning = true;
+                }
                 break;
             case R.id.change_ip:
                 String newIP = edit_ip.getText().toString();
+                Log.d("__","asdasdasdasdasda");
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("server_ip",newIP);
                 editor.apply();
